@@ -1,0 +1,314 @@
+(function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r;
+    i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date();
+    a = s.createElement(o),
+    m = s.getElementsByTagName(o)[0];
+    a.async = 1;
+    a.src = g;
+    m.parentNode.insertBefore(a, m)
+})(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+
+
+$(document).ready(function () {
+
+    timer = setInterval(function() {
+        var ruta = window.location + " - ";
+        if((ruta.indexOf("/login") != -1)){
+            //$("#unauthorized_holder").html("<div id='unauthorized_holder'><div id='unauthorized_message'><h2 class='ui-state-error'>Importante: Acceso al EVA</h2><p>Si visualizas esta pantalla es porque el ciclo acadÃƒÂ©mico aÃƒÂºn no ha iniciado, estamos preparando todo para ti.</br>El acceso al EVA estarÃƒÂ¡ disponible a partir del  11 de abril, fecha en la que empezamos las actividades acadÃƒÂ©micas.</p></div></div>");
+            $("#unauthorized_holder").html("<div id='unauthorized_holder'><div id='unauthorized_message'><h2 class='ui-state-error'>Importante: Acceso al EVA</h2><p>Este usuario no tiene matrÃ­cula activa en el periodo actual</p></div></div>");
+        }
+        clearInterval(timer);
+    }, 500);
+
+//EDILOJA
+ 
+    var openC = document.getElementsByClassName("tab");
+    var i, j, k;
+    for (i = 0; i < openC.length; i++) {
+        var tabcontent = document.getElementsByClassName("panel");
+        openC[i].addEventListener("click", function () {
+            for (j = 0; j < tabcontent.length; j++) {
+                tabcontent[j].style.display = "none";
+            }
+            var tablinks = document.getElementsByClassName("tab");
+            for (k = 0; k < tablinks.length; k++) {
+                tablinks[k].className = tablinks[k].className.replace(" active1", "");
+            }
+            var link = 'Link' + this.id;
+            document.getElementById(link).style.display = "block";
+            document.getElementById(this.id).className += " active1";
+        });
+    }
+    var openS = document.getElementsByClassName("semana_tab");
+    for (i = 0; i < openS.length; i++) {
+        var tabContenedor = document.getElementsByClassName("panel2");
+        openS[i].addEventListener("click", function () {
+            for (j = 0; j < tabContenedor.length; j++) {
+                tabContenedor[j].style.display = "none";
+            }
+            var tabSemanas = document.getElementsByClassName("semana_tab");
+            for (k = 0; k < tabSemanas.length; k++) {
+                tabSemanas[k].className = tabSemanas[k].className.replace(" active2", "");
+            }
+            var link = 'Link' + this.id;
+            document.getElementById(link).style.display = "block";
+            document.getElementById(this.id).className += " active2";
+        });
+    }
+
+
+/* *******************INICIO DE CAMBIOS REALIZADOS EN CANVASUTPL - 29/03/2019 ******************** */
+
+    /* Colocar el menÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº de "Soporte tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©cnico" en el menÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âº principal del curso */
+    //  $("#menu li:first-child").after("<li class='menu-item ic-app-header__menu-list-item'><a id='global_nav_profile_helpUTPL' href='https://cases.canvaslms.com/apex/liveagentchat?lang=es_MX' target='_blank' class='ic-app-header__menu-list-link'><div class='menu-item-icon-container' aria-hidden='true'><div class='ic-icon-svg ic-icon-svg--courses'><img src='https://slcc.instructure.com/courses/366650/files/53660935/preview?verifier=2yRGydnowgbouCq3C80xn7ZumPNQQgDg790X77Ng' alt=''></div></div><div class='menu-item__text'>Soporte t\u00e9cnico</div></a></li>");
+    
+    /* Cambiar el texto "Badgets" por "Insignias" */
+        $('#section-tabs .section a[title="Badges"]').text("Insignias");
+    
+
+/* *******************FIN DE CAMBIOS REALIZADOS EN CANVASUTPL - 29/03/2019 ******************** */
+
+/*-------------------------------LTI Canvas Gradebook---------------------*/
+
+var showGrade=false;
+ //Get User Role
+if ($.inArray('student', ENV['current_user_roles']) > -1) {
+    showGrade = true;
+} 
+//El menu, visualizar unicamente al rol estudiante
+if (showGrade === true) {
+    //Campusoft. 
+    //Establecer el Id del Tool LTI creado
+    var ltiToolId = 5111;
+    //1. Generar la URL del LTI, utilizando la variable del usuario actual
+    var gradeLink = "https://utpl.instructure.com/users/"+ENV["current_user_id"]+"/external_tools/"+ltiToolId;
+    //2. Segun la posicion que utpl defina para el icono, before, after. (Selectores css)
+    //Agregar un LI. 
+
+   $("#menu li:last-child").before("<li class='menu-item ic-app-header__menu-list-item'><a id='NotasUTPL' href='"+gradeLink+"'  class='ic-app-header__menu-list-link'><div class='menu-item-icon-container' aria-hidden='true'><div class='ic-icon-svg ic-icon-svg--courses'><img src=' data:image/png;base64,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' alt=''></div></div><div class='menu-item__text'>NotasUTPL</div></a></li>");
+
+
+}
+
+/*-------------------------------LTI Canvas Gradebook---------------------*/
+
+/*-------------------------------ALLY - Accesibilidad --------------------*/
+
+window.ALLY_CFG = {
+    'baseUrl': 'https://prod.ally.ac',
+    'clientId': 6321
+};
+$.getScript(ALLY_CFG.baseUrl + '/integration/canvas/ally.js');
+/*---------------------------FIN JS ALLY ---------------------------*/
+
+/*--------------------------LOG USER--------------------------------*/
+
+    var ruta = window.location + " - ";
+    var fecha_log = new Date();
+
+    ga('remove');
+    ga('create', 'UA-119559850-1', 'auto');
+    ga('set', 'dimension1', ENV["current_user_id"]);
+    var fecha_log = new Date();
+
+    sTemp = window.location.pathname.match(/\/courses\/(\d+)/);
+    
+    if (!sTemp) {
+        //Get User Information
+        ga('send', 'pageview', {
+          'page': '/fecha/' + (fecha_log.getMonth() + 1) + '_' + fecha_log.getFullYear() + '/logueoUtplMensual/usuario/' + ENV["current_user_id"] + '/rol/' + ENV['current_user_roles'].toString()
+        });   
+    }
+
+/*------------------------------------------------------------------*/
+// START - More Google Analytics Tracking Code
+    var sUserId
+    var sUserRole
+    var sTemp // Course ID from URL
+    var _course
+    var sCourseName = null
+    var parent_account //Give you the subaccount_id that the course is in
+    var roleUserCourse 
+
+////////////////// CHANGE UA # HERE /////////////////////
+    ga('create', 'UA-119559850-1', 'auto');
+
+    //Get User Information
+    sUserId = ENV["current_user_id"]
+    ga('set', 'dimension1', sUserId);
+
+    //Get User Role
+    if ($.inArray('admin', ENV['current_user_roles']) == -1 && $.inArray('teacher', ENV['current_user_roles']) == -1 && $.inArray('student', ENV['current_user_roles']) > -1) {
+        sUserRole = "student"
+    } else if ($.inArray('admin', ENV['current_user_roles']) == -1 && $.inArray('teacher', ENV['current_user_roles']) > -1) {
+        sUserRole = "teacher"
+    } else if ($.inArray('admin', ENV['current_user_roles']) > -1) {
+        sUserRole = "admin"
+    } else {
+        sUserRole = "other"
+    }
+
+    ga('set', 'dimension3', sUserRole);
+    
+    //If the user is in a course
+    try {
+        sTemp = window.location.pathname.match(/\/courses\/(\d+)/);
+        if (sTemp[1]) {
+            //Get Course information - Course Name and parent sub-account id
+            var d1 = $.get('/api/v1/courses/' + sTemp[1], function (_course) {
+                parent_account = _course.account_id
+                parent_account = parent_account.toString();
+                sCourseName = _course.name
+            });
+
+            $.when(d1).done(function (_account) {
+                // ...do stuff...
+                ga('set', 'dimension4', sTemp[1]);
+                ga('set', 'dimension5', sCourseName);
+                ga('set', 'dimension6', parent_account);
+                ga('send', 'pageview');
+            });
+        } else {
+            ga('send', 'pageview');
+        }
+    
+        // Start Login Video
+        $('body.ic-Login-Body .ic-app').prepend('<video autoplay muted loop id="bgvid"><source src="https://www.dropbox.com/s/lle3cnt8u03lhar/SoyUTPL.mp4?dl=1" type="video/mp4"></video><div class="video-dottedoverlay"></div>');
+        // End Login Video
+
+        /** BEGIN UTPL - 30/04/2019 */ 
+        
+        if (sTemp[1]) { // inside a course
+
+            /* Conocer el rol en un curso */
+            $.ajax({
+              method: "GET",
+              url: "/api/v1/courses/" + sTemp[1] + "/enrollments?user_id=" + sUserId,
+              async: false
+            })
+            .done(function( data2 ) {
+                if(JSON.stringify(data2)!="[]"){
+                    roleUserCourse = JSON.stringify(data2[0].type).replace(/"/g,'');    
+                }else{
+                    if(sUserId != 5428){ // id del admin de canvas: soporte_eva 
+                            roleUserCourse = "norole";
+                    }else{
+                            roleUserCourse = "soporte_eva";
+                    }
+                }
+            }); 
+
+            /* BEGIN HETEROEVAL TEACHERS*/
+            var roles = ["TeacherEnrollment","TaEnrollment","DesignerEnrollment","ObserverEnrollment","norole"];
+            if($.inArray(roleUserCourse, roles) > -1){ // quitar la heteroevaluación a los roles que no sean estudiantes
+                try {
+                    var ruta = window.location + " - ";
+                    if(ruta.indexOf("/courses/" + sTemp[1] + "/modules")!= -1  || ruta=="https://utpl.instructure.com/courses/" + sTemp[1]  + " - "){
+                        $("#context_modules .context_module .content .context_module_items .quiz a").each(function( index ) {   
+                            if($(this).html().trim().indexOf("accesibles READSPEAKER") != -1){
+                                 $(this).parents(".context_module").remove();   
+                            }
+                        });     
+                    }else if(ruta.indexOf("/courses/" + sTemp[1] + "/quizzes")!= -1){
+                        /* get out from evaluations institutional */
+                        timer_2 = setInterval(function() {
+                            /* get out from evaluations site */
+                            $("#surveys-quizzes .quiz .ig-row__layout .ig-info a").each(function( index ) {
+                                if($(this).html().trim().indexOf("accesibles READSPEAKER") != -1){
+                                    $(this).parents(".quiz").remove();      
+                                }
+                            });
+                            clearInterval(timer_2);
+                        }, 500);
+                        /* get out from quiz view results evaluations institutional*/
+                        valor = $("#content-wrapper #quiz_show #quiz_title").html();
+                        if(valor !== null && (valor.trim().indexOf("accesibles READSPEAKER") != -1)) {
+                           $("#not_right_side").html("<div></div>");
+                           window.location.href = '/courses/'+ sTemp[1];
+                        }   
+                    }
+                } catch (err) {}
+            }
+            /* END HETEROEVAL TEACHERS */
+            /* BEGIN ROLE STUDENT*/
+            if(roleUserCourse == "StudentEnrollment"){  
+                try {                   
+                    /* BEGIN EVALUACION CASES */
+                    try{
+                        $.ajax({
+                          method: "GET",
+                          url: "/api/v1/users/" + sUserId + "/custom_data?ns=r_s_test&data=1",
+                          async: false
+                        })
+                        .done(function( dataeval ) {
+                            /*alert(JSON.stringify(dataeval['data'].replace(/"/g,'')));*/
+                        })
+                        .fail(function (jqXHR, textStatus) {
+                            /*alert("error: " + textStatus + " dato:" + JSON.stringify(jqXHR));*/
+                            /* BEGIN REDIRECT TO THE SURVEY EVALUACIÓN INSTITUCIONAL */                         
+                            $.get('/api/v1/courses/' + sTemp[1]+'/quizzes?search_term=accesibles READSPEAKER', function (_cuest) {
+                                ruta = window.location + " - ";
+                                cadena = "/courses/"+ sTemp[1] + "/quizzes/" + JSON.stringify(_cuest[0].id);
+                                if(ruta.indexOf(cadena)==-1){                                   
+                                    alert("Estimado estudiante, debe realizar la evaluación de aacesibilidad de Readspeaker");
+                                    window.location.href = '/courses/'+ sTemp[1] + '/quizzes/' + JSON.stringify(_cuest[0].id); 
+                                }
+                            });
+                            /* END REDIRECT TO THE SURVEY FOR EACH STUDENT */
+                            /* BEGIN STUDENTS SUBMIT ALL QUESTIONS*/
+                            $("#content .loaded .quiz-header h1").each(function( index ) {
+                                if($(this).html().trim().indexOf("accesibles READSPEAKER") != -1){
+                                    // valida que llene todas las opciones en la encuesta
+                                    $("#submit_quiz_button").click(function(e){
+                                        e.preventDefault(); 
+                                        var cont=0;
+                                        $("#submit_quiz_form #questions .question_holder .display_question").each(function( index ) {
+                                            if(!$(this).hasClass("text_only_question")){
+                                                if(!$(this).hasClass("answered")){
+                                                    $(this).css("background","#FFEBD8");
+                                                    cont++; 
+                                                }else{
+                                                    $(this).css("background","#ffffff");
+                                                }
+                                            }
+                                        });
+                                        if (cont>0){ 
+                                            alert("Existen " + cont + " preguntas sin contestar. Proceda a realizarlo.");
+                                        }else{
+                                            /*se envía a actualizar el estado del estudiante*/
+                                            $.ajax({
+                                                url: "/api/v1/users/" + sUserId + "/custom_data/",
+                                                type: "PUT",
+                                                contentType: "application/json",
+                                                data: JSON.stringify({
+                                                    "ns" : "r_s_test",
+                                                    "data" : "1"
+                                                }),
+                                                success: function(datos, textStatus, jqXHR) {
+                                                    $("#submit_quiz_form").submit();
+                                                },
+                                                error: function(jqXHR, textStatus, errorThrown) {
+                                                    //alert("Estimado estudiante, la información no pudo ser guardada. Intente una vez más.");
+                                                    //alert(textStatus + " - " + JSON.stringify(jqXHR));
+                                                    console.warn(errorThrown);
+                                                }
+                                            })
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    } catch (err) { /*alert(err)*/ }    
+                    /* END STUDENTS SUBMIT ALL QUESTIONS */ 
+                    /* END EVALUACION CASES */
+                } catch (err) {/**/ }   
+            }   
+            /* END ROLE STUDENT*/
+        }
+        /** END UTPL - 30/04/2019 */    
+    } catch (err) {}
+    
+});

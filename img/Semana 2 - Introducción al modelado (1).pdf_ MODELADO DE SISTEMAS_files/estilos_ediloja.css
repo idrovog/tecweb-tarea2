@@ -1,0 +1,64 @@
+video#bgvid {
+  height: auto;
+  left: 50%;
+  min-height: 100%;
+  min-width: 100%;
+  position: fixed;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  width: auto;
+  z-index: -100;
+}
+
+.ic-Login{
+	
+    justify-content: flex-end;
+    padding-right: 50px;
+    
+}
+
+.video-dottedoverlay {
+  /* background-image: url("https://www.dropbox.com/s/r0yblvotzbx5nlj/gridtile.png?dl=1"); */
+  background-repeat: repeat;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 3;
+}
+
+
+
+video#bgvid {
+  transition: opacity 1s ease 0s;
+}
+
+
+
+.ic-Login__content {
+ opacity: .9;
+ 
+}
+
+
+
+.ic-Login__header .ic-Login__header__logo img {
+    display: block;
+   	max-width: 225%;
+    margin-left: auto;
+    margin-right: auto;
+    
+    !important}
+    
+
+    
+.ic-brand-Login-body-bgd-color {
+background-color:none;
+}
+
+
+
+.ic-DashboardCard__header_image .ic-DashboardCard__header_hero {background:none !important;}
+
+

@@ -1,0 +1,169 @@
+/* Style the tab */
+.tabnotas {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tabnotas button {
+  background-color: inherit;
+  float: left;
+  /*border: none;*/
+  border: 0px dashed gray;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tabnotas button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tabnotas button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontentnotas {
+  display: block;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+.totales{
+  background-color: #DDEAF3; 	
+  text-align:center;
+  font-weight:bold;
+  font-size:110%;   
+  border:1px solid gray;
+}
+
+.final{
+  background-color: #fff;
+  color: #000;
+  font-size: 140%;
+  width: 46%;
+  padding:10px;
+  float:right;
+  clear:right;
+  -webkit-border-radius: 10px 10px;  /* Safari  */
+  -moz-border-radius: 10px 10px;     /* Firefox */
+}
+
+.presencial{
+  background-color: #fff;
+  color: #000;
+  font-size: 100%;
+  width: 39%;
+  padding:10px;
+  text-align:justify;
+  float:left;
+  clear:left;
+}
+
+.cont_final{
+	width: 100%;
+	background-color: #fff;
+	border:0px solid gray;
+	padding:3px 0px 3px 0px;
+	clear:both;
+}
+
+.tabla{
+  width:100%;
+  background:#003f72;
+  color:#fff;
+  font-weight:bold;  
+  padding: 6px;
+}
+
+.tabla_{
+  width:100%;
+  background:#003f72;
+  font-weight:bold;  
+  padding: 6px;
+}
+
+.act_error{
+  width:100%;
+  text-align:center;
+  background:#fff;
+  color:#red;
+  font-weight:normal;
+  padding: 6px;  
+  border:3px solid red;
+}
+
+.borde1{
+  border:1px solid gray;  	
+}
+
+.borde0{
+  border:0px solid gray;  	
+}
+
+.tabla1{
+  width:100%;
+  text-align:center;
+  background:#EBE9E9;
+}
+
+.tabla2{
+  width:100%;
+  text-align:center;
+  background:#ccc;	
+}
+
+.tabla3{
+  width:100%;
+  text-align:center;
+  background:#fff;	
+}
+
+.w1{
+ width:5%;	
+ border:1px solid gray;
+}
+
+.w2{
+ width:78%;	
+ border:1px solid gray;
+ text-align: left;
+ padding: 6px;
+}
+
+.w3{
+ width:17%;	
+ border:1px solid gray;
+}
+
+.w4{
+ width:78%;	
+ border:1px solid gray;
+ text-align: center;
+ font-weight:bold;
+ padding: 6px;
+}
+
+.bold{
+	font-weight:bold;
+}
+
+.footer{
+	font-size: 80%;
+	padding: 6px;
+}
+
+.importante{
+	font-size: 85%;
+}
+
+.fecha{
+	font-size:70%;
+}

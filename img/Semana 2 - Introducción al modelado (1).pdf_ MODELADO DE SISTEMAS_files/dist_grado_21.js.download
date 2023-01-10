@@ -1,0 +1,770 @@
+//In Google Analytics you'll need to set up custom dimensions as follows
+// Custom Dimension 1 = Canvas User ID --- Scope = User
+// Custom Dimension 2 = Archived --- Scope = User
+// Custom Dimension 3 = Canvas User Role --- Scope = User
+// Custom Dimension 4 = Canvas Course ID --- Scope = Hit
+// Custom Dimension 5 = Canvas Course Name --- Scope = Hit
+// Custom Dimension 6 = Canvas Sub-Account ID --- Scope = Hit
+
+(function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r;
+    i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date();
+    a = s.createElement(o),
+    m = s.getElementsByTagName(o)[0];
+    a.async = 1;
+    a.src = g;
+    m.parentNode.insertBefore(a, m)
+})(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+$(document).ready(function () {
+
+    // START - More Google Analytics Tracking Code
+    var sUserId;
+    var sUserRole;
+    var sTemp; // Course ID from URL
+    var _course;
+    var sCourseName = null;
+    var parent_account; //Give you the subaccount_id that the course is in
+    var roleUserCourse; 
+
+////////////////// CHANGE UA # HERE /////////////////////
+    ga('remove');
+    ga('create', 'UA-119559850-1', 'auto');
+
+    //Get User Information
+    sUserId = ENV["current_user_id"];
+    ga('set', 'dimension1', sUserId);
+
+    //Get User Role
+    
+    if($.inArray('root_admin', ENV['current_user_roles']) > -1 ){
+        sUserRole = "root_admin";
+    } else if ($.inArray('admin', ENV['current_user_roles']) == -1 && $.inArray('teacher', ENV['current_user_roles']) == -1 && $.inArray('student', ENV['current_user_roles']) > -1) {
+        sUserRole = "student";
+    } else if ($.inArray('admin', ENV['current_user_roles']) == -1 && $.inArray('teacher', ENV['current_user_roles']) > -1) {
+        sUserRole = "teacher";
+    } else if ($.inArray('admin', ENV['current_user_roles']) > -1) {
+        sUserRole = "admin";
+    } else {
+        sUserRole = "other";
+    }
+
+    ga('set', 'dimension3', sUserRole);
+    
+    //If the user is in a course
+    try {
+        sTemp = window.location.pathname.match(/\/courses\/(\d+)/);
+        if (sTemp[1]) {
+            //Get Course information - Course Name and parent sub-account id
+            var d1 = $.get('/api/v1/courses/' + sTemp[1], function (_course) {
+                parent_account = _course.account_id;
+                parent_account = parent_account.toString();
+                sCourseName = _course.name;
+            });
+
+            $.when(d1).done(function (_account) {
+                // ...do stuff...
+                ga('set', 'dimension4', sTemp[1]);
+                ga('set', 'dimension5', sCourseName);
+                ga('set', 'dimension6', parent_account);
+                ga('send', 'pageview');
+            });
+        } else {
+            ga('send', 'pageview');
+        }
+    
+        /** BEGIN UTPL - 30/04/2019 */ 
+        
+        if (sTemp[1]) { // inside a course
+            if(sUserRole != "root_admin"){
+                /* Conocer el rol en un curso */
+                $.ajax({
+                  method: "GET",
+                  url: "/api/v1/courses/" + sTemp[1] + "/enrollments?user_id=" + sUserId,
+                  async: false
+                })
+                .done(function( data2 ) {
+                    if(JSON.stringify(data2)!="[]"){
+                        roleUserCourse = JSON.stringify(data2[0].type).replace(/"/g,'');    
+                    }else{
+                        roleUserCourse = "norole";
+                    }
+                }); 
+            }else{
+                if(sUserId != 5428){ // id del admin de canvas: soporte_eva 
+                    roleUserCourse = "root_admin";
+                }else{
+                    roleUserCourse = "soporte_eva";
+                }               
+            }
+            
+            /* BEGIN TEACHERS */
+            var roles = ["TeacherEnrollment","TaEnrollment","ObserverEnrollment","norole"];
+            if($.inArray(roleUserCourse, roles) > -1){ // quitar la heteroevaluaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n/evaluacion institucional a los roles que no sean estudiantes
+                try {
+                    /************************************ BEGIN NSE TEACHERS CONTROLS **********************************************************/
+                    var ruta = window.location + " - ";
+                    
+                    /* Bloquear la ediciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­tulo, puntos posibles, categorÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­as en las actividades para el profesor */
+                    /* Al momento de crear o editar una actividad */
+                    if((ruta.indexOf("/courses/" + sTemp[1] + "/assignments/") != -1 || ruta.indexOf("/courses/" + sTemp[1] + "/quizzes/") != -1 || ruta.indexOf("/courses/" + sTemp[1] + "/discussion_topics/") != -1) && (ruta.indexOf("/edit") != -1 || ruta.indexOf("/new") != -1) && (!$("#section-tabs .section .active").hasClass("announcements"))){
+                        timer3_ed = setInterval(function() {
+                            if(ruta.indexOf("/assignments") != -1){
+                                if($("#assignment_group_id option:selected").text().trim().indexOf("TIVIDADES ADICIONALES") == -1 && $("#assignment_group_id option:selected").text().trim().indexOf("TIVIDADES UTE") == -1){
+                                    if(ruta.indexOf("/edit") != -1){
+                                        $("#assignment_name").attr("readonly","readonly");
+                                        $("#assignment_points_possible").attr("readonly","readonly");
+                                        $("#assignment-gear-button-cr .delete_assignment_link").remove();   
+                                    }else{  // if(ruta.indexOf("/new") != -1)
+                                        $("#assignment_group_id option").each(function( index ){
+                                            if($(this).text().trim().indexOf("TIVIDADES ADICIONALES")!=-1 || $(this).text().trim().indexOf("TIVIDADES UTE")!=-1){
+                                                $("#assignment_group_id option[value='" + $(this).val() + "']").attr("selected", true); 
+                                            }
+                                        }); 
+                                    }
+                                    $("#assignment_grading_type").attr("readonly","readonly");
+                                    $("#assignment_grading_type option").not(':selected').remove();
+                                }
+                                $("#assignment_group_id").attr("readonly","readonly");
+                                $("#assignment_group_id option").not(':selected').remove();
+                            }else if(ruta.indexOf("/quizzes") != -1){
+                                if($("#quiz_assignment_group_id option:selected").text().trim().indexOf("TIVIDADES ADICIONALES") == -1 && $("#quiz_assignment_group_id option:selected").text().trim().indexOf("TIVIDADES UTE") == -1){
+                                    if(ruta.indexOf("/edit") != -1){
+                                        $("#quiz_title").attr("readonly","readonly");
+                                        $("#quiz_title").css("background","rgb(242, 242, 242)");
+                                        $(".header-bar .header-group-right .admin-links .delete_quiz_link").remove();   
+                                    }else{  //  if(ruta.indexOf("/new") != -1)
+                                        $("#quiz_assignment_group_id option").each(function( index ){
+                                            if($(this).text().trim().indexOf("TIVIDADES ADICIONALES")!=-1 || $(this).text().trim().indexOf("TIVIDADES UTE")!=-1){
+                                                $("#quiz_assignment_group_id option[value='" + $(this).val() + "']").attr("selected", true);    
+                                            }
+                                        }); 
+                                    }
+                                    $("#quiz_assignment_id").attr("readonly","readonly");
+                                    $("#quiz_assignment_id option").not(':selected').remove();
+                                }
+                                $("#quiz_assignment_group_id").attr("readonly","readonly");
+                                $("#quiz_assignment_group_id option").not(':selected').remove();
+                            }else if(ruta.indexOf("/discussion_topics") != -1){
+                                if($("#assignment_group_id option:selected").text().trim().indexOf("TIVIDADES ADICIONALES") == -1 && $("#assignment_group_id option:selected").text().trim().indexOf("TIVIDADES UTE") == -1){
+                                    if(ruta.indexOf("/edit") != -1){
+                                        $("#discussion-title").attr("readonly","readonly");
+                                        $("#discussion-title").css("background","rgb(242, 242, 242)");
+                                        $("#discussion_topic_assignment_points_possible").attr("readonly","readonly");  
+                                        $("#discussion_topic_assignment_points_possible").css("background","rgb(242, 242, 242)");
+                                    }else{ // if(ruta.indexOf("/new") != -1)
+                                        $("#assignment_group_id option").each(function( index ){
+                                            if($(this).text().trim().indexOf("TIVIDADES ADICIONALES")!=-1 || $(this).text().trim().indexOf("TIVIDADES UTE")!=-1){   
+                                                $("#assignment_group_id option[value='" + $(this).val() + "']").attr("selected", true); 
+                                                if($(this).text().trim().indexOf("TIVIDADES ADICIONALES")!=-1){
+                                                    $("#assignment_group_id").attr("title","Este grupo de tareas 'ACTIVIDADES ADICIONALES' no debe ser cambiado");
+                                                }
+                                            }
+                                        }); 
+                                    }
+                                    $("#assignment_grading_type").attr("readonly","readonly");
+                                    $("#assignment_grading_type option").not(':selected').remove();
+                                }
+                                $("#assignment_group_id").attr("readonly","readonly");
+                                $("#assignment_group_id option").not(':selected').remove();
+                            }
+                            
+                            //quitar la funcionalidad al boton "caminos de dominio"
+                            $('a[href*="mastery-paths-editor"]').parents("li").remove();
+                            clearInterval(timer3_ed);
+                        }, 3000);
+                    }else if(((ruta.indexOf("/courses/" + sTemp[1] + "/assignments/") != -1 && ruta.trim().charAt(ruta.trim().length-3) != "/" ) || (ruta.indexOf("/courses/" + sTemp[1] + "/quizzes/") != -1 && ruta.trim().charAt(ruta.trim().length-3) != "/" ) || (ruta.indexOf("/courses/" + sTemp[1] + "/discussion_topics/") != -1 && ruta.trim().charAt(ruta.trim().length-3) != "/")) && (ruta.indexOf("/edit") == -1 && ruta.indexOf("/new") == -1)){
+                        
+                        /* quitar la funcionalidad al botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de "Publicado" */        
+                        document.addEventListener('click', function (e) {
+                            if($(e.target).hasClass("btn-published") || $(e.target).hasClass("btn-publish") || $(e.target).hasClass("publish-text") || $(e.target).hasClass("icon-publish") 
+                                || $(e.target).hasClass("icon-unpublish") || $(e.target).hasClass("btn-unpublish") || $(e.target).hasClass("btn-publish")){
+                                e.preventDefault();
+                                e.stopPropagation();
+                                alert("Dir\u00EDjase al menu 'Tareas' para realizar esta acci\u00F3n.");    
+                            }
+                        }, true);
+                        /* quitar la opciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de "Eliminar" dentro de los tres puntos*/
+                        $(".header-group-right .inline-block ul li .delete_quiz_link").remove();
+                        $(".pull-right .admin-links .delete_discussion").remove();
+                        
+                    }
+                    /* BEGIN ASSIGNMENTS CONTROLS */
+                    if((ruta.indexOf("/courses/" + sTemp[1] + "/assignments") != -1) && (ruta.indexOf("/courses/" + sTemp[1] + "/assignments/")== -1 || ruta.trim().charAt(ruta.trim().length-3)== "/")){
+                        /************************* REMOVE DRAG AND DROP *************************/
+                        timer3 = setInterval(function() {
+                            if ($('.ui-sortable').length) {
+                                $('.ui-sortable').sortable('destroy');
+                                clearInterval(timer3);
+                            }
+                        }, 500);
+                        /*************************  INICIO DE CONTROLES PARA EL DOCENTE  *************************/
+                        timer3_1 = setInterval(function() {
+                            /*  remove el boton "+Grupo"  */
+                            $(".header-bar-right").remove();
+                            /*  remove el boton "+Tarea" y "3 puntos" */
+                            $(".item-group-condensed .ig-header .ag-header-controls .inline-block").remove();
+                            /*  remove la caja de bÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºsqueda */
+                            $("#search_term").remove();
+                            /* Remover los botones "+" y "3 puntos" en cada uno de los grupos, excepto el llamado "ACTIVIDADES ADICIONALES" */
+                            $(".item-group-condensed .ig-header .ig-header-title .element_toggler").each(function( index ){
+                                if($(this).html().replace(/(<([^>]+)>)/ig,'').trim().indexOf("TIVIDADES ADICIONALES") == -1 && $(this).html().replace(/(<([^>]+)>)/ig,'').trim().indexOf("TIVIDADES UTE") == -1){
+                                    $(this).parents(".ig-header").find(".ag-header-controls .add_assignment").remove();
+                                    $(this).parents(".assignment_group").on('click','.edit_assignment',function(e){
+                                        if(!confirm('\u00A1Estimado docente, est\u00e1 a punto de editar una actividad espec\u00edfica. Recuerde que de estas configuraciones depender\u00e1 la nota que se calcule y publique a los estudiantes, tanto en el primero como segundo bimestre. \u00bfDesea continuar\u003F')) {
+                                            $('.ui-widget-overlay').siblings('.ui-dialog[aria-hidden="false"]').find('.ui-widget-header button').click();
+                                        }
+                                        $('.ui-widget-overlay').siblings('.ui-dialog[aria-hidden="false"]').find('.control-group').each(function( index ) {
+                                            if($(this).find("input:text").attr("id").trim().indexOf("assignment_name") != -1 || $(this).find("input:text").attr("id").trim().indexOf("assignment_point") != -1){
+                                                $(this).find("input:text").attr("readonly","readonly"); 
+                                                $(this).find("input:text").css("background","rgb(242, 242, 242)");
+                                            }
+                                        });
+                                    });         
+                                    /* deshabilitar la acciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de despublicar (icono verde con visto) en "Tareas" (/assignments) */
+                                    $(this).parents(".assignment_group").find(".publish-icon-published").addClass("disabled","disabled");
+                                    $(this).parents(".assignment_group").find(".publish-icon-published").attr("title","Acci\u00F3n deshabilitada");
+                                }
+                            });
+                            /* deshabilitar la acciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de despublicar (icono verde con visto) en "Tareas" (/assignments) */
+                            document.addEventListener('click', function (e) {
+                                if(($(e.target).hasClass("icon-publish") || $(e.target).hasClass("icon-unpublish") || $(e.target).hasClass("publish-text")) && ($(e.target).parents(".assignment_group").find(".ig-header .ag-header-controls .add_assignment").html()==null)){
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    alert("Acci\u00F3n deshabilitada en este grupo de tareas.");    
+                                }
+                            }, true);   
+                            clearInterval(timer3_1);
+                        }, 1000);
+                        timer3_2 = setInterval(function() {
+                            /* Bloquear las opciones ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œEditarÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â, ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œMover aÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â, ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œCaminos de dominioÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â, ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œEliminarÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â y ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œCompartir a CommonsÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â en 
+                            las actividades que no estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©n colocadas en el conjunto de grupos ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œACTIVIDADES ADICIONALESÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â. */
+                            document.addEventListener('click', function (e) {
+                                if ((e.target.classList.contains('menu_tool_link') || e.target.classList.contains('duplicate_assignment') || e.target.classList.contains('edit_mastery_paths')|| e.target.classList.contains('delete_assignment') || e.target.classList.contains('move_assignment') || e.target.classList.contains('send_assignment_to') || e.target.classList.contains('copy_assignment_to')) && $(event.target).parents(".item-group-condensed").find(".ig-header .ig-header-title .element_toggler").html().replace(/(<([^>]+)>)/ig,'').trim().indexOf("CTIVIDADES ADICIONALES") == -1 && $(event.target).parents(".item-group-condensed").find(".ig-header .ig-header-title .element_toggler").html().replace(/(<([^>]+)>)/ig,'').trim().indexOf("CTIVIDADES UTE") == -1){
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    alert("Acci\u00F3n deshabilitada en este grupo de tareas.");    
+                                    $(e.target).closest('ul').hide();
+                                }
+                            }, true);
+                            clearInterval(timer3_2);
+                        }, 500);    
+                        timer3_3 = setInterval(function() {
+                            /* Bloquear las opciones ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œMover aÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â, ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œCaminos de dominioÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â y ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œCompartir a CommonsÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â en las actividades 
+                            que estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©n dentro del conjunto de grupos ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œACTIVIDADES ADICIONALESÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â. */
+                            document.addEventListener('click', function (e) {
+                                if ((e.target.classList.contains('menu_tool_link') || e.target.classList.contains('move_assignment')|| e.target.classList.contains('edit_mastery_paths') || e.target.classList.contains('send_assignment_to') || e.target.classList.contains('copy_assignment_to')) && $(event.target).parents(".item-group-condensed").find(".ig-header .ig-header-title .element_toggler").html().replace(/(<([^>]+)>)/ig,'').trim().indexOf("CTIVIDADES ADICIONALES") != -1 && $(event.target).parents(".item-group-condensed").find(".ig-header .ig-header-title .element_toggler").html().replace(/(<([^>]+)>)/ig,'').trim().indexOf("CTIVIDADES UTE") != -1){
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    alert("Acci\u00F3n deshabilitada en este grupo de tareas.");    
+                                    $(e.target).closest('ul').hide();
+                                }
+                            }, true);   
+                            clearInterval(timer3_3);
+                        }, 500);
+                    }
+                    /* END ASSIGNMENTS CONTROLS */
+                    /* BEGIN MODULES CONTROLS */
+                    if(ruta.indexOf("/courses/" + sTemp[1] + "/modules")!= -1){
+                        /*
+                        $("#content-wrapper").html(" ");
+                        window.location.href = '/courses/'+ sTemp[1];   
+                        */
+                    }
+                    /* END MODULES CONTROLS */
+                    /* BEGIN QUIZZES CONTROLS */
+                    if((ruta.indexOf("/courses/" + sTemp[1] + "/quizzes") != -1) && (ruta.indexOf("/courses/" + sTemp[1] + "/quizzes/")== -1 || ruta.trim().charAt(ruta.trim().length-3)== "/")){                       
+                        timer4_1 = setInterval(function() {
+                            /* remover el botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n "+Examen" */
+                            $(".new-quiz-link").remove();
+                            $("#searchTerm").remove();
+                            
+                            $(".item-group-container #assignment-quizzes li").each(function( index ){
+                                /* remover al opciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n "Eliminar" dentro de los 3 puntos */
+                                $(this).find(".ig-admin .inline-block .delete-item").remove();
+                                /* remover la opciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n "Caminos de dominio" dentro de los 3 puntos */
+                                $(this).find(".ig-admin .inline-block .icon-mastery-path").remove();
+                                /* deshabilitar la acciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de despublicar (icono verde con visto) en "Tareas" (/assignments) */
+                                $(this).find(".publish-icon-published").addClass("disabled","disabled");
+                                $(this).find(".publish-icon-published").attr("title","Acci\u00F3n deshabilitada");
+                            });
+                            clearInterval(timer4_1);
+                        }, 500);    
+                        /* deshabilitar la acciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de despublicar (icono verde con visto) en "Quiz" (/quizzes) */
+                        document.addEventListener('click', function (e) {                       
+                            if(($(e.target).hasClass("icon-publish") || $(e.target).hasClass("icon-unpublish") || $(e.target).hasClass("publish-text")) && $(e.target).parents("#assignment-quizzes").html()!=null){
+                                e.preventDefault();
+                                e.stopPropagation();
+                                alert("Acci\u00F3n deshabilitada dentro de cuestionarios.");    
+                            }
+                        }, true);   
+                    }
+                    /* END QUIZZES CONTROLS */
+                    /* BEGIN FORUMS CONTROLS */
+                    if((ruta.indexOf("/courses/" + sTemp[1] + "/discussion_topics") != -1) && (ruta.indexOf("/courses/" + sTemp[1] + "/discussion_topics/")== -1 || ruta.trim().charAt(ruta.trim().length-3)== "/")){                       
+                        timer5_1 = setInterval(function() {
+                            
+                            /* remover el botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n "+Examen" */
+                            $("#add_discussion").remove();
+                            $("input[name=discussion_search]").parent().remove();
+                            $("#delete-discussion-menu-option").css("border","3px solid green");
+                            
+                            /* remover los botones para eliminar y mover foros*/
+                            document.addEventListener('click', function (e) {
+                                if($(e.target).parents(".discussions-index-manage-menu").html() != null){   
+                                    timer5_2 = setInterval(function() {
+                                        $("#delete-discussion-menu-option").remove();
+                                        $("#duplicate-discussion-menu-option").remove();
+                                        $("#masterypaths-discussion-menu-option").remove();
+                                        clearInterval(timer5_2);
+                                    }, 300);    
+                                }
+                            }, true);   
+                            
+                            /* deshabilitar la acciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de despublicar (icono verde con visto) en "Foros" (/discussion_topics) */
+                            $(".ic-discussion-row-container .ic-discussion-content-container .publish-button").each(function( index ){
+                                $(this).find("svg title").addClass("disabled","disabled");
+                                $(this).find("svg title").html("Acci\u00F3n deshabilitada");
+                            });     
+                            
+                            /* deshabilitar la acciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n del botÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n de despublicar (icono verde con visto) en "Foros" (/discussion_topics) */
+                            document.addEventListener('click', function (e) {       
+                                if($(e.target).hasClass("toggle-button") ||  $(e.target).hasClass("publish-button") || $(e.target).parents(".publish-button").find("svg").html() != null){
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    alert("Acci\u00F3n deshabilitada dentro de foros.");    
+                                }
+                            }, true);
+                            
+                            clearInterval(timer5_1);
+                        }, 500);    
+                    }
+                    /* END FORUMS CONTROLS */
+                    /* BEGIN PAGES CONTROLS */
+                    if(ruta.indexOf("/courses/" + sTemp[1] + "/pages/horario-de-tutorias/edit")!= -1){
+                        $("#title").attr("readonly","readonly");
+                    }
+                    /* END PAGES CONTROLS */
+                    /************************************ END NSE TEACHERS CONTROLS **********************************************************/
+                    /* BEGIN HETEROEVAL TEACHERS*/
+                    var ruta = window.location + " - ";
+                    if(ruta.indexOf("/courses/" + sTemp[1] + "/modules")!= -1  || ruta=="https://utpl.instructure.com/courses/" + sTemp[1]  + " - "){
+                        /* remove module*/
+                        /*$("#context_modules .context_module .content .context_module_items .quiz a").each(function( index ) {   
+                            if($(this).html().trim().indexOf("para evaluar a su docente") != -1){
+                                 $(this).parents(".context_module").remove();   
+                            }
+                        }); */
+                        /*
+                        $("#context_modules .context_module .content .context_module_items .quiz a").each(function( index ) {   
+                            if($(this).html().trim().indexOf("N INSTITUCIONAL 2019") != -1){
+                                 $(this).parents(".context_module").remove();   
+                            }
+                        });*/     
+                    }else if(ruta.indexOf("/courses/" + sTemp[1] + "/quizzes")!= -1){
+                        /* get out from heteroevaluations  */
+                        timer_ = setInterval(function() {
+                            /* get out from evaluations site */
+                            $("#surveys-quizzes .quiz .ig-row__layout .ig-info a").each(function( index ) {
+                                if($(this).html().trim().indexOf("para evaluar a su docente") != -1){
+                                    $(this).parents(".quiz").remove();      
+                                }
+                            });
+                            clearInterval(timer_);
+                        }, 500);
+                        /* get out from quiz view results */
+                        valor = $("#content-wrapper #quiz_show #quiz_title").html();
+                        if(valor !== null && (valor.trim().indexOf("para evaluar a su docente") != -1)) {
+                           $("#not_right_side").html("<div></div>");
+                           window.location.href = '/courses/'+ sTemp[1];
+                        }   
+                        /* get out from evaluations institutional */
+                        timer_2 = setInterval(function() {
+                            /* get out from evaluations site */
+                            $("#surveys-quizzes .quiz .ig-row__layout .ig-info a").each(function( index ) {
+                                if($(this).html().trim().indexOf("N INSTITUCIONAL 2019") != -1){
+                                    $(this).parents(".quiz").remove();      
+                                }
+                            });
+                            clearInterval(timer_2);
+                        }, 500);
+                        /* get out from quiz view results evaluations institutional*/
+                        valor = $("#content-wrapper #quiz_show #quiz_title").html();
+                        if(valor !== null && (valor.trim().indexOf("N INSTITUCIONAL 2019") != -1)) {
+                           $("#not_right_side").html("<div></div>");
+                           window.location.href = '/courses/'+ sTemp[1];
+                        }   
+                    }
+                    /* END HETEROEVAL TEACHERS */
+                } catch (err) {}
+            }
+            /* END TEACHERS */
+            var roles_ = ["TeacherEnrollment","norole","soporte_eva"];
+            if($.inArray(roleUserCourse, roles_) > -1){ 
+                /* BEGIN CREATE GROUP SET "Grupos_por_paralelo" */
+                ruta_ = window.location + " - ";
+                cadena1 = "/courses/"+ sTemp[1] + "/users";
+                cadena2 = "/courses/"+ sTemp[1] + "/groups";
+                if(ruta_.indexOf(cadena1)!= -1 || ruta_.indexOf(cadena2)!= -1){ 
+                    timer_2 = setInterval(function() {
+                        if(sCourseName == null){
+                            timer_2_1 = setInterval(function() {
+                                var nombre_curso = "'"+ sCourseName + "'";  
+                                clearInterval(timer_2_1);
+                            }, 500);    
+                        }else{
+                            var nombre_curso = "'"+ sCourseName + "'";  
+                        }
+                        
+                        if(nombre_curso != null){
+                            $("#crear_conjunto_grupos").remove();
+                            $('.group-categories-actions').prepend('<button id="crear_conjunto_grupos" onclick="crear_conjunto_grupos(' + sTemp[1] + ',' + nombre_curso  + ')" class="btn btn-primary" title="crear conjunto de grupos por paralelo" aria-label="crear conjunto de grupos por paralelo"><i class="icon-plus"></i> Grupos por paralelo</button>');   
+                            
+                            $.each($("#group_categories_tabs .ui-tabs-nav li a"), function(i, item_each) {
+                                if($(this).html().trim()=='Grupos_por_paralelo'){
+                                    $(this).css("background","#E2E2E0");
+                                    if(ruta_.indexOf(cadena2) != -1){
+                                        var aria_control = $(this).parent().attr("aria-controls");
+                                        this.addEventListener('click', function (e) {
+                                            if($("#enrol_stud_grupos").val() != "undefined"){
+                                                if(roleUserCourse != "soporte_eva"){
+                                                    $("#enrol_stud_grupos").remove();
+                                                    $("#" + aria_control).find(".add-group").remove();
+                                                }
+                                                $("#" + aria_control + " .group-category-actions").prepend('<button id="enrol_stud_grupos" onclick="enrolar_grupos(' + sTemp[1] + ',' + nombre_curso  + ')" class="btn add-group_utpl" title="Enrolar estudiantes en los grupos" aria-label="Enrolar estudiantes en los grupos"><i class="icon-plus"></i> Enrolar estudiantes en los grupos</button>'); 
+                                            }
+                                            if(roleUserCourse != "soporte_eva"){
+                                                /*$("#" + aria_control).find(".group-category-actions").prepend('<button id="enrol_stud_grupos" onclick="enrolar_grupos(' + sTemp[1] + ',' + nombre_curso  + ')" class="btn add-group_utpl" title="Enrolar estudiantes en los grupos" aria-label="Enrolar estudiantes en los grupos"><i class="icon-plus"></i> Enrolar estudiantes en los grupos</button>');*/
+                                                $.each($("#" + aria_control).find(".group-category-actions .al-options li, .group-actions li"), function(i, item_) {
+                                                    if(!$(this).find("a").hasClass('delete-category') && !$(this).find("a").hasClass('delete-group')){
+                                                        $(this).remove();
+                                                    }
+                                                });         
+                                                /* Eliminar drag and drop */
+                                                $("#" + aria_control + " .ui-draggable").draggable('destroy');
+                                                $("#" + aria_control + " .ui-droppable").droppable('destroy');
+                                                $("#" + aria_control + " input[type='search']").remove();
+                                            }
+                                        }, false);
+                                        
+                                        if(roleUserCourse != "soporte_eva"){
+                                            $("#" + aria_control + " .ui-draggable").draggable('destroy');
+                                            $("#" + aria_control + " .ui-droppable").droppable('destroy');
+                                            $("#" + aria_control + " input[type='search']").remove();
+                                            $.each($("#" + aria_control).find(".group-category-actions .al-options li, .group-actions li"), function(i, item_) {
+                                                if(!$(this).find("a").hasClass('delete-category') && !$(this).find("a").hasClass('delete-group')){
+                                                    $(this).remove();
+                                                }
+                                            }); 
+                                        }
+                                    }
+                                }
+                                $("#" + aria_control).find(".add-group").remove();
+                                $("#" + aria_control + " .group-category-actions").prepend('<button id="enrol_stud_grupos" onclick="enrolar_grupos(' + sTemp[1] + ',' + nombre_curso  + ')" class="btn add-group_utpl" title="Enrolar estudiantes en los grupos" aria-label="Enrolar estudiantes en los grupos"><i class="icon-plus"></i> Enrolar estudiantes en los grupos</button>');
+                            });
+                        }else{
+                            /*alert("el nombre del curso es null");*/
+                            /*window.location.href = '/courses/'+ sTemp[1] + "/groups";                     */
+                        }   
+                        clearInterval(timer_2);
+                    }, 1500);
+                }
+                /* END CREATE GROUP SET "Grupos_por_paralelo" */
+            }
+            
+            /* BEGIN ROLE STUDENT*/
+            if(roleUserCourse == "StudentEnrollment"){  
+                try {                   
+                
+                    /* something */
+                    $('#section-tabs .section a[href="/courses/' + sTemp[1] +'/external_tools/5408"]').remove();
+                    //$('#section-tabs .section a[href="/courses/' + sTemp[1] +'/external_tools/5770"]').remove();
+
+                    var id_course_publica = ["31561","31559","31558","31556","32115","32225","32927","28356","28353","30162","28357","31119","31117",
+                        "28360","28351","28368","28365","28363","31120","30448","31001","30391","28036","29055","31590","31757","28458","29738",
+                        "31705","32196","29041","28910","31706","32177","29266","31836","32075","32081","31794"];
+                    if ($.inArray(sTemp[1], id_course_publica) != -1) {
+                        var ruta = window.location + " - ";
+                        if(ruta.indexOf("/courses/" + sTemp[1] + "/external_tools/")!= -1){
+                            ga('send', 'pageview', {
+                                'page': '/courses/' + sTemp[1] + '/accesoltipublica/usuario/' + sUserId + '/rol/' +  roleUserCourse +'|' + ruta
+                            });
+                        }     
+                    }
+
+/*
+                    var ruta = window.location + " - ";
+                    if(ruta.indexOf("/courses/" + sTemp[1] + "/external_tools/")!= -1){
+
+                        ga('send', 'pageview', {
+                            'page': '/courses/' + sTemp[1] + '/accesopublica/usuario/' + sUserId + '/rol/' +  roleUserCourse +'|' + ruta
+                        });
+                    }
+*/
+                    
+                } catch (err) {/**/ }   
+            }   
+            /* END Crear Zoom*/
+        }
+        /** END UTPL - 30/04/2019 */    
+    } catch (err) {}
+});
+
+
+
+
+
+/* INICIO FUNCIONES CONJUNTO DE GRUPOS CANVAS-UTPL */
+function existe_grupos_paralelos(data){
+    if(JSON.stringify(data) != "[]"){
+        var existe = 0;
+        $.each(data, function(i, item) {
+            if(JSON.stringify(item.name).replace(/"/g,'')=='Grupos_por_paralelo'){
+                existe++;
+            }
+        });
+        if(existe>0){
+            return true;    
+        }else{
+            return false;
+        }
+    }
+}
+    
+function crear_conjunto_grupos(curso,sCourseName){      
+    
+    $(".roster").parent().html("<center><img style='margin:0 auto' id='img_load' src='https://media1.tenor.com/images/d6cd5151c04765d1992edfde14483068/tenor.gif' width=20%></center>");
+    
+    timer_cg = setInterval(function() {
+        /* OBTENER EL GRUPO DE CATEGORIAS*/
+        $.ajax({
+            method: "GET",
+            url: "/api/v1/courses/" + curso + "/group_categories?name=Grupos_por_paralelo",
+            async: false
+        })
+        .done(function( data ) {
+            if(!existe_grupos_paralelos( data )){       
+                /* CREAR CONJUNTO DE GRUPOS */
+                $.ajax({
+                    url: "/api/v1/courses/" + curso + "/group_categories?name=Grupos_por_paralelo&self_signup=restricted",
+                    type: 'POST',
+                    contentType: "application/json",
+                    success: function(data2, textStatus, jqXHR) {
+                        if(JSON.stringify(data2)!="[]"){
+                            /* OBTENER EL NUMERO DE SECCIONES QUE NO SEA PROFESORES*/
+                            $.ajax({
+                                method: "GET",
+                                url: "/api/v1/courses/" + curso + "/sections?include[]=students&per_page=100",
+                                async: false
+                            })
+                            .done(function(data3) {
+                                if(JSON.stringify(data3)!="[]"){
+                                    $.each(data3, function(i, item3) {
+                                        if(JSON.stringify(item3.name).replace(/"/g,'')!='PROFESORES'){
+                                            /* CREAR EL GRUPO PARA CADA SECCION */
+                                            $.ajax({
+                                                url: "/api/v1/group_categories/" + JSON.stringify(data2.id).replace(/"/g,'') + "/groups?name=" + item3.name + "-" + sCourseName,
+                                                type: 'POST',
+                                                contentType: "application/json",
+                                                async: false,
+                                                success: function(data4, textStatus, jqXHR) {
+                                                    $.each(item3.students, function(i, item4) {
+                                                        $.ajax({
+                                                            url: "/api/v1/groups/" + JSON.stringify(data4.id).replace(/"/g,'') + "/memberships?user_id=" +  JSON.stringify(item4.id).replace(/"/g,''),
+                                                            type: 'POST',
+                                                            contentType: "application/json",
+                                                            async: false,
+                                                            success: function(data5, textStatus, jqXHR) {
+                                                                /*alert("enrolo al estudiante con id: " + JSON.stringify(item4.id).replace(/"/g,''));*/
+                                                            },
+                                                            error: function(jqXHR, textStatus, errorThrown) {
+                                                                /*alert("error1:" + textStatus + " -- " + errorThrown);*/
+                                                            }
+                                                        })
+                                                    })
+                                                },
+                                                error: function(jqXHR, textStatus, errorThrown) {
+                                                    /*alert("error2:" + textStatus + " -- " + errorThrown);*/
+                                                }
+                                            })
+                                        }
+                                    });
+                                    /*$("#img_load").remove();*/
+                                }else{
+                                    alert("No existen secciones (paralelos) creadas en el curso");
+                                }
+                            })
+                            .fail(function( jqXHR, textStatus ) {
+                                /**/
+                            });
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        /*alert("err11111:" + textStatus);*/
+                    }
+                })
+                alert("El proceso de creaci\u00f3n de Grupos por paralelo ha iniciado.");
+                /*window.location.href = '/courses/'+ curso + "/groups/";*/
+                location.reload();
+            }else{
+                alert("El agrupamiento 'grupos_por_paralelo' ya existe");
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            /*alert("error5:" + textStatus + " - " + JSON.stringify(jqXHR));*/
+        });
+        clearInterval(timer_cg);
+    }, 500);    
+}
+
+function enrolar_grupos(curso,sCourseName){ 
+    $("#group_categories_tabs .groups").html("<center><img style='margin:0 auto' id='img_load' src='https://media1.tenor.com/images/d6cd5151c04765d1992edfde14483068/tenor.gif' width=20%></center>");                  
+    
+    timer_2_1_ = setInterval(function() {
+        
+        /* OBTENER EL GRUPO DE CATEGORIAS*/
+        $.ajax({
+            method: "GET",
+            url: "/api/v1/courses/" + curso + "/group_categories?name=Grupos_por_paralelo",
+            async: false
+        })
+        .done(function( data ) {
+            if(existe_grupos_paralelos( data )){    
+                /* BUSCAR EL GRUPO DE CADA ESTUDIANTE */
+                hash = $(".tab-panel:visible").attr("id");
+                total_enrolar = $(".tab-panel:visible .unassigned-users-heading").html().replace(/[A-Za-z]/g,"").replace(/[()]/g,"");
+                if($(".tab-panel:visible .unstyled li .assign-to-group").length > 0){
+                    alert("El proceso ha iniciado. Se enrolar\u00e1n 50 estudiantes cada vez que se presione este bot\u00f3n.");
+                    
+                    for(i=1;i<=9;i++){
+                        /* OBTIENE EL ID DE LA SECCION */
+                        $.ajax({
+                            method: "GET",
+                            url: "/api/v1/courses/" + curso + "/enrollments?page=" + i + "&per_page=10000",
+                            async: false
+                        })
+                        .done(function( data1 ) {
+                            $(".tab-panel:visible .unstyled li .assign-to-group").each(function( index ) {  
+                                objeto = this;
+                                $(objeto).css("background","lightgreen");
+                                $(".unassigned-users-heading").html("Alumnos no asignados (" + total_enrolar + ")");
+                                    
+                                $.each(data1, function(i, item1) {
+                                    if(item1.user_id==$(objeto).data('user-id').split("_")[1]){
+                                        /* OBTIENE EL NOMBRE DE LA SECCION */
+                                        $.ajax({
+                                            method: "GET",
+                                            url: "/api/v1/courses/" + curso + "/sections/" + JSON.stringify(item1.course_section_id).replace(/"/g,''),
+                                            async: false
+                                        })
+                                        .done(function( data2 ) {
+                                            /* RECORRE EL CONJUNTO DE GRUPOS BUSCANDO AL LLAMADO "grupos_por_paralelo" */       
+                                            encontrado = 0;
+                                            $.each(data, function(i, item) {
+                                                if(JSON.stringify(item.name).replace(/"/g,'')=='Grupos_por_paralelo'){
+                                                    encontrado++;
+                                                    /* OBTENER LOS GRUPOS DEL CONJUNTO DE GRUPOS*/
+                                                    $.ajax({
+                                                        method: "GET",
+                                                        url: "/api/v1/group_categories/" + JSON.stringify(item.id).replace(/"/g,'') + "/groups",                              
+                                                        async: false
+                                                    })  
+                                                    .done(function( data_ ) {
+                                                        /* RECORRER LOS GRUPOS */
+                                                        existe_grupo=0;
+                                                        $.each(data_, function(i, item_) {
+                                                            if(item_.name == data2.name + "-" + sCourseName){
+                                                                existe_grupo++;
+                                                                $(objeto).parent().remove();
+                                                                total_enrolar--;
+                                                                /* ENROLAR AL USUARIO */
+                                                                $.ajax({
+                                                                    url: "/api/v1/groups/" + JSON.stringify(item_.id).replace(/"/g,'') + "/memberships?user_id=" +   $(objeto).data('user-id').split("_")[1],
+                                                                    type: 'POST',
+                                                                    async: false,
+                                                                    contentType: "application/json",
+                                                                    success: function(data5, textStatus, jqXHR) {
+                                                                        /*alert("enrolo al estudiante con id: " + $(objeto).data('user-id').split("_")[1]);*/
+                                                                    },
+                                                                    error: function(jqXHR, textStatus, errorThrown) {
+                                                                        /*alert(JSON.stringify(jqXHR));
+                                                                        alert("error1:" + textStatus + " -- " + errorThrown);
+                                                                        alert("/api/v1/groups/" + JSON.stringify(item_.id).replace(/"/g,'') + "/memberships?user_id=" +   $(objeto).data('user-id').split("_")[1]);*/
+                                                                    }
+                                                                })  
+                                                            }
+                                                        }); 
+                                                        if(existe_grupo==0){
+                                                            /* CREAR EL GRUPO PARA ENROLAR AL ESTUDIANTE 
+                                                            POR ALGUNA RAZON EL GRUPO NO SE CREO EN EL CRON O EL PROFESOR LO ELIMINO
+                                                            */
+                                                            /* CREAR EL GRUPO PARA CADA SECCION */
+                                                            alert("El grupo " + data2.name + "-" + sCourseName + " no existe. Se proceder\u00e1 a crearlo");    
+                                                            $.ajax({
+                                                                url: "/api/v1/group_categories/" + JSON.stringify(item.id).replace(/"/g,'') + "/groups?name=" +  data2.name + "-" + sCourseName,                                  
+                                                                type: 'POST',
+                                                                contentType: "application/json",
+                                                                async: false,
+                                                                success: function(data4, textStatus, jqXHR) {
+                                                                    $.ajax({
+                                                                        url: "/api/v1/groups/" + JSON.stringify(data4.id).replace(/"/g,'') + "/memberships?user_id=" +  $(objeto).data('user-id').split("_")[1],
+                                                                        type: 'POST',
+                                                                        async: false,
+                                                                        contentType: "application/json",
+                                                                        success: function(data5, textStatus, jqXHR) {
+                                                                            /*alert("enrolo al estudiante con id: " + JSON.stringify(item4.id).replace(/"/g,''));*/
+                                                                        },
+                                                                        error: function(jqXHR, textStatus, errorThrown) {
+                                                                            /*alert(JSON.stringify(jqXHR));
+                                                                            alert("error2:" + textStatus + " -- " + errorThrown);*/
+                                                                        }
+                                                                    })                                                  
+                                                                },
+                                                                error: function(jqXHR, textStatus, errorThrown) {
+                                                                    /*alert("error3:" + textStatus + " -- " + errorThrown);*/
+                                                                }
+                                                            })  
+                                                        }
+                                                        
+                                                    })
+                                                    .fail(function( jqXHR, textStatus ) {
+                                                        /*alert("error55555:" + textStatus + " -- " + jqXHR);*/
+                                                    });                                     
+                                                }
+                                            });
+                                            if(encontrado==0){
+                                                alert("El conjunto de grupos 'Grupos_por_paralelo' a\u00fan no ha sido creado. Use el bot\u00f3n '+Crear' para hacerlo");   
+                                            }
+                                        })
+                                        .fail(function( jqXHR, textStatus ) {
+                                            /*alert("error5:" + textStatus + " -- " + jqXHR);*/
+                                        });
+                                        
+                                        return false;
+                                    }   
+                                });
+                                
+                            });
+                        })
+                        .fail(function( jqXHR, textStatus ) {
+                            /*alert("error6:" + textStatus + " -- " + jqXHR.toSource());*/
+                        }); 
+                    }
+                    /*window.location.href = '/courses/'+ curso + "/groups/#" + hash;*/
+                }else{
+                    alert("No existen estudiantes por ser enrolados en los grupos");    
+                }
+                location.reload();
+            }else{
+                alert("El conjunto de grupos 'Grupos_por_paralelo' a\u00fan no ha sido creado");
+            }
+        })
+        .fail(function( jqXHR, textStatus ) {
+            /*alert("error7:" + textStatus + " -- " + jqXHR);*/
+        }); 
+        
+        clearInterval(timer_2_1_);
+    }, 500);    
+}
