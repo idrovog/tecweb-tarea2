@@ -1,0 +1,106 @@
+body {
+    background-color: #f7f7fa;
+}
+.cabecera {
+    background-color: hsl(0, 0%, 100%);
+    height: 100px;
+    font-size-adjust: 2.4em;
+    color: #468fc0;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    text-align: center;
+}
+.cabecera img {
+    float: left;
+    width: 8%;
+
+}
+.empresa {
+    font-size: 3em;
+    color: #2d9ee9;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    float: center;
+}
+
+.slogan {
+    font-size: 1em;
+    color: #2d9ee9;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    float: center;
+}
+
+.titulo {
+    font-size: 1.2em;
+    color: #75a5c5;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: bold;
+    text-align: center;
+    padding-top: 20px;
+}
+
+nav {
+    float: center;
+}
+
+nav ul {
+    list-style: none;
+}
+nav ul li{
+    display:inline-block;
+}
+nav ul li a{
+    font-size: 0.80em;
+    color: #2d9ee9;
+    text-decoration: none;
+    padding-right: 20px;
+}
+nav ul li a:hover{
+    font-size: 0.90em;
+    text-decoration: underline;
+    padding-right: 20px;   
+}
+
+.secciones {
+    clear: both;
+    width:fit-content;
+    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items:stretch;
+}
+
+.parte1 {
+    float: left;
+    width: 20%;
+    padding-right: 20px;
+    text-align: justify;
+}
+
+.parte2 {
+    float: left;
+    width: 18%;
+    padding-right: 20px;
+    text-align: justify;
+}
+
+.parte3 {
+    float: left;
+    width: 18%;
+    padding-right: 20px;
+    text-align: justify;
+}
+
+.parte4 {
+    float: left;
+    width: 18%;
+    padding-right: 20px;
+    text-align: justify;
+}
+
+.parte5 {
+    float: left;
+    width: 18%;
+    padding-right: 20px;
+    text-align: justify;
+}
