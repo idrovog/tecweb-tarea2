@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/estilos.css">
     <title>Document</title>
 </head>
 <body>
-    <header>
-        <span align="center"><h1>TECHNOPARTS parte de TI, Día a Día</h1></span>
-        <p>Menù</p>
+    <header class="cabecera">
+        <img src="img/Logo.PNG" alt="Logo de la Empresa">
+        <span class="empresa">TechnoParts</span>
+        <span class="slogan">Parte de TI, Día a Día</span>
         <nav>
             <ul>
               <li><a href="index.html">Home</a></li>
@@ -19,22 +21,23 @@
               <li><a href="bibliografia.html">Bibliografía</a></li>
             </ul>
         </nav>
-        <span align="center"><img src="img/Logo.PNG" alt="Logo de la Empresa"></span>
     </header>
     <section>
-        <h2>Tecnologías Backend</h2>
+        <h2 class="titulo">Tecnologías Backend</h2>
         <article>
-            <p>
-                En base a lo estudiado, podemos decir que la tecnologías Backend son aplicaciones que corren del lado del servidor quien responderá las solicitudes ejecutando el código creado según la aplicación y envía la respuesta al programa cliente (Frondend). El backend también es la parte que se conecta con la base de datos. 
-            </p>
-            <p>
-                Adicionalmente, podemos decir que Backend es un término desarrollo web que hace referencia a un tipo de programación particular, en el que se configuran todos los aspectos lógicos de una página web o aplicación
-            </p>
-            <img src="img/backend.png" alt="">
-            <p>
+            <aside class="parrafo">
+                <p>
+                    En base a lo estudiado, podemos decir que la tecnologías Backend son aplicaciones que corren del lado del servidor quien responderá las solicitudes ejecutando el código creado según la aplicación y envía la respuesta al programa cliente (Frondend). El backend también es la parte que se conecta con la base de datos. 
+                 </p>
+                <p>
+                    Adicionalmente, podemos decir que Backend es un término desarrollo web que hace referencia a un tipo de programación particular, en el que se configuran todos los aspectos lógicos de una página web o aplicación
+                </p>
+            </aside>
+
+            <aside  class="parrafo">
                 <h3>Principales aplicaciones</h3>
                 <table>
-                    <caption align="top"><b> Lista de aplicaciones principales</b></caption>
+                    <b> Lista de aplicaciones principales</b>
                     <tr>
                         <th>Aplicacion</th>
                         <th>Detalle</th>
@@ -60,21 +63,10 @@
                         <td>para desarrollar microservicios y Api Rest, entre otros. Con una comunidad muy grande, hoy en día se usa bastante, porque tiene un alto performance y no es tan complicado para desarrollar, como C o C++, ya que contiene un garbage collector y ayuda mucho a la hora de desarrollar. Cuando necesitas velocidad y el tiempo es importante, Go puede ser la mejor opción.</td>
                     </tr>
                 </table>
+            </aside>
 
-
-            </p>
+            
         </article>
-    </section>
-    <section>
-        <article>
-            <img src="img/tec-web.jpg" alt="Logo">
-        </article>
-    </section>
-    <footer>
-        <dt></dt>
-        <dd></dd>
-        <span align="right"><dd>Tecnologías WEB</dd></span>
-        <span align="right"><dd>Galo Idrovo</dd></span>
-    </footer>
+    
 </body>
 </html>
